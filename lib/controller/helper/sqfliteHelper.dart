@@ -1,84 +1,79 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class SQLiteHelper {
+  final _databaseName = "mydatabase2.db";
+  final _databaseVersion = 1;
+
+  final table = 'resume';
+  final resume_id = 'resume_id';
+  final resume_name = 'resume_name';
+  final photo = 'photo';
+  final fName = 'fname';
+  final lName = 'lName';
+  final aboutyourself = 'aboutyourself';
+  final job_title = 'job_title';
+  final number = 'number';
+  final email = 'email';
+  final address = 'address';
+  final city = 'city';
+  final state = 'state';
+  final create_time = 'create_time';
+
+  final project_table = 'project';
+  final pro_id = 'pro_id';
+  final pro_name = 'pro_name';
+  final pro_detail = 'pro_detail';
+
+  final experience = 'experience';
+  final exp_id = 'exp_id';
+  final compny_name = 'compny_name';
+  final join_time = 'join_time';
+  final left_time = 'left_time';
+  final job_role = 'job_role';
+
+  final education = 'education';
+  final edu_id = 'edu_id';
+  final location_name = 'location_name';
+  final edu_join_date = 'edu_join_date';
+  final edu_left_date = 'edu_left_date';
+  final edu_type = 'edu_type';
+  final edu_score = 'edu_score';
+
+  final techskills = 'techskills';
+  final ts_id = 'ts_id';
+  final ts_name = 'ts_name';
+  final sub_ts_name = 'sub_ts_name';
+
+  final language = 'language';
+  final lang_id = 'lang_id';
+  final lang_name = 'lang_name';
+
   SQLiteHelper._();
 
-  static final _databaseName = "myDatabase.db";
-  static final _databaseVersion = 1;
-
-  static final table = 'resume';
-  static final resume_id = 'resume_id';
-  static final photo = 'photo';
-  static final fName = 'fname';
-  static final lName = 'lName';
-  static final aboutyourself = 'aboutyourself';
-  static final job_title = 'job_title';
-  static final number = 'number';
-  static final email = 'email';
-  static final address = 'address';
-  static final city = 'city';
-  static final state = 'state';
-  static final create_time = 'create_time';
-
-//tbl project
-  static final project_table = 'project';
-  static final pro_id = 'pro_id';
-  static final pro_name = 'pro_name';
-  static final pro_detail = 'pro_detail';
-
-//tbl experience
-  static final experience = 'experience';
-  static final exp_id = 'exp_id';
-  static final compny_name = 'compny_name';
-  static final join_time = 'join_time';
-  static final left_time = 'left_time';
-  static final job_role = 'job_role';
-
-  //tbl education
-  static final education = 'education';
-  static final edu_id = 'edu_id';
-  static final location_name = 'location_name';
-  static final edu_join_date = 'edu_join_date';
-  static final edu_left_date = 'edu_left_date';
-  static final edu_type = 'edu_type';
-  static final edu_score = 'edu_score';
-
-  //tbl techskills
-
-  static final techskills = 'techskills';
-  static final ts_id = 'ts_id';
-  static final ts_name = 'ts_name';
-  static final sub_ts_name = 'sub_ts_name';
-
-  //tbl langeuage
-
-  static final langeuage = 'langeuage';
-  static final lang_id = 'lang_id';
-  static final lang_name = 'lang_name';
-
-  // make this a singleton class
-
   static final SQLiteHelper sqLiteHelper = SQLiteHelper._();
-
-  // only have a single app-wide reference to the database
   static Database? _mydatabase;
 
   Future<Database> get database async {
-    if (_mydatabase != null) return _mydatabase!;
-    _mydatabase = await _initDatabase();
+    if (_mydatabase != null) {
+      return _mydatabase!;
+    }
+
+    _mydatabase = await initDatabase();
     return _mydatabase!;
   }
 
-  // this opens the database (and creates it if it doesn't exist)
-  _initDatabase() async {
+  initDatabase() async {
     String path = join(await getDatabasesPath(), _databaseName);
     return await openDatabase(path, version: _databaseVersion,
-        onCreate: (db, version) {
-      db.execute('''
+        onCreate: (db, version) async {
+          await db.execute('''
           CREATE TABLE $table (
             $resume_id INTEGER PRIMARY KEY,
+            $resume_name TEXT,
             $fName TEXT,
             $lName TEXT,
             $number INTEGER,
@@ -89,62 +84,63 @@ class SQLiteHelper {
             $photo TEXT,
             $aboutyourself TEXT,
             $job_title TEXT,
-            $create_time DATE NOT NULL,
+            $create_time TEXT NOT NULL
           )
           ''');
-      db.execute('''
+          await db.execute('''
           CREATE TABLE $project_table (
             $pro_id INTEGER PRIMARY KEY,
             $pro_name TEXT,
             $pro_detail TEXT,
-            $create_time DATE NOT NULL,
+            $create_time TEXT NOT NULL
           )
           ''');
-      db.execute('''
+          await db.execute('''
           CREATE TABLE $experience (
             $exp_id INTEGER PRIMARY KEY,
             $compny_name TEXT,
-            $join_time DATE,
-            $left_time DATE,
+            $join_time TEXT,
+            $left_time TEXT,
             $job_role TEXT,
-            $create_time DATE NOT NULL,
+            $create_time TEXT NOT NULL
           )
           ''');
-      db.execute('''
+          await db.execute('''
           CREATE TABLE $education (
             $edu_id INTEGER PRIMARY KEY,
             $location_name TEXT,
-            $edu_join_date DATE,
-            $edu_left_date DATE,
+            $edu_join_date TEXT,
+            $edu_left_date TEXT,
             $edu_type TEXT,
             $edu_score TEXT,
-            $create_time DATE NOT NULL,
+            $create_time TEXT NOT NULL
           )
           ''');
-      db.execute('''
+          await db.execute('''
           CREATE TABLE $techskills (
             $ts_id INTEGER PRIMARY KEY,
             $ts_name TEXT,
             $sub_ts_name TEXT,
-            $create_time DATE NOT NULL,
+            $create_time TEXT NOT NULL
           )
           ''');
-      db.execute('''
-          CREATE TABLE $langeuage (
+          await db.execute('''
+          CREATE TABLE $language (
             $lang_id INTEGER PRIMARY KEY,
             $lang_name TEXT,
-            $create_time DATE NOT NULL,
+            $create_time TEXT NOT NULL
           )
           ''');
-    });
+        });
   }
+
 
   addmaintbl(
     String fname,
     String lname,
     int mobile_number,
-    String email,
-    String address,
+    String emailid,
+    String addresss,
     String cityname,
     String statename,
     String aboutyourSelf,
@@ -152,15 +148,16 @@ class SQLiteHelper {
     String uphoto,
   ) async {
     final db = await database;
-    await db.insert(
+    int index = await db.insert(
       '$table',
       {
         fName: fname,
-        fName: fname,
+        lName: lname,
+        resume_name: fname + lname,
         photo: uphoto, // Corrected column name
         number: mobile_number,
-        email: email,
-        address: address,
+        email: emailid,
+        address: addresss,
         city: cityname,
         state: statename,
         aboutyourself: aboutyourSelf,
@@ -168,7 +165,11 @@ class SQLiteHelper {
         create_time: DateTime.now().toString(),
       },
     );
+    log('${index}');
   }
+
+
+
 
   updatemaintbl(
     int id,
@@ -210,9 +211,11 @@ class SQLiteHelper {
     );
   }
 
-  getmaintbl() async {
+  Future<List<Map<String, Object?>>> getmaintbl() async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $table');
+    // log('${db.close()}');
+    // log('${db.rawQuery('SELECT * FROM $table')}');
+    List<Map<String, Object?>> list = await db.rawQuery('SELECT * FROM $table');
     return list;
   }
 
@@ -455,14 +458,15 @@ class SQLiteHelper {
     String lang,
   ) async {
     final db = await database;
-    await db.insert(
-      '$langeuage',
+    int index =await db.insert(
+      '$language',
       {
         lang_name: lang,
-
         create_time: DateTime.now().toString(),
       },
     );
+
+    log('${index}');
   }
 
   updatelangeuage(
@@ -473,7 +477,7 @@ class SQLiteHelper {
     final db = await database;
 
     await db.update(
-      '$langeuage',
+      '$language',
       {
         lang_name: lang,
       },
@@ -485,7 +489,7 @@ class SQLiteHelper {
   deletelangeuage(int id) async {
     final db = await database;
     await db.delete(
-      '$langeuage',
+      '$language',
       where: '$ts_id = ?',
       whereArgs: [id],
     );
@@ -493,7 +497,7 @@ class SQLiteHelper {
 
   getlangeuage() async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $langeuage');
+    List<Map> list = await db.rawQuery('SELECT * FROM $language');
     return list;
   }
 }

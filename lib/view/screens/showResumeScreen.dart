@@ -20,19 +20,24 @@ class _ShowAllResumeScreenState extends State<ShowAllResumeScreen> {
       body: Column(
         children: [],
       ),
-      bottomSheet: Container(
-        height: s.height * 0.1,
-        width: double.maxFinite,
-        padding: EdgeInsets.all(12),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            color: Color(0XFFBDE5E1),
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15), topRight: Radius.circular(15))),
-        child: Text(
-          'Create New Resume',
-          style: TextStyle(
-              color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+      bottomSheet: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pushNamed('add_page');
+        },
+        child: Container(
+          height: s.height * 0.1,
+          width: double.maxFinite,
+          padding: EdgeInsets.all(12),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              color: Color(0XFFBDE5E1),
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15), topRight: Radius.circular(15))),
+          child: Text(
+            'Create New Resume',
+            style: TextStyle(
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+          ),
         ),
       ),
     );
