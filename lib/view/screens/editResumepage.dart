@@ -4,30 +4,31 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:resume_builder_app/controller/helper/sqfliteHelper.dart';
-import 'package:resume_builder_app/controller/resumeController.dart';
 import 'package:resume_builder_app/model/maintblModel.dart';
 
-class AddResumePage extends StatefulWidget {
-  const AddResumePage({super.key});
+import '../../model/educationModel.dart';
+import '../../model/expModel.dart';
+import '../../model/projectModel.dart';
+
+class EditResumePage extends StatefulWidget {
+  const EditResumePage({super.key});
 
   @override
-  State<AddResumePage> createState() => _AddResumePageState();
+  State<EditResumePage> createState() => _EditResumePageState();
 }
 
-List<String> allfiled = [
-  'Main',
-  'Education',
-  'Techskills',
-  'Langeuages',
-  'Projects',
-  'Experience',
-];
+class _EditResumePageState extends State<EditResumePage> {
+  List<String> allfiled = [
+    'Main',
+    'Education',
+    'Techskills',
+    'Langeuages',
+    'Projects',
+    'Experience',
+  ];
 
-String selecatfild = 'Main';
-
-class _AddResumePageState extends State<AddResumePage> {
+  String selecatfild = 'Main';
   TextEditingController fname = TextEditingController();
   TextEditingController lname = TextEditingController();
   TextEditingController phone = TextEditingController();
@@ -45,11 +46,6 @@ class _AddResumePageState extends State<AddResumePage> {
     'edu_type': TextEditingController(),
     'edu_score': TextEditingController(),
   };
-
-  // final project_table = 'project';
-  // final pro_id = 'pro_id';
-  // final pro_name = 'pro_name';
-  // final pro_detail = 'pro_detail';
 
   Map<String, dynamic> projectsMap = {
     'pro_name': TextEditingController(),
@@ -72,11 +68,85 @@ class _AddResumePageState extends State<AddResumePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    education.add(educationMap);
-    projects.add(projectsMap);
-    exp.add(expMap);
-    techskills.add(TextEditingController());
-    langeuages.add(TextEditingController());
+    // education.add(educationMap);
+    // projects.add(projectsMap);
+    // exp.add(expMap);
+    // techskills.add(TextEditingController());
+    // langeuages.add(TextEditingController());
+  }
+
+  MainTblModel? maintblData;
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    maintblData = ModalRoute.of(context)!.settings.arguments as MainTblModel;
+    getotherdata(maintbl_id: maintblData!.resume_id);
+  }
+
+  List<Map<String, dynamic>> expdata = [];
+  List<Map<String, dynamic>> edudata = [];
+  List<Map<String, dynamic>> languagesdata = [];
+  List<Map<String, dynamic>> projectdata = [];
+  List<Map<String, dynamic>> techskilldata = [];
+
+  getotherdata({required int maintbl_id}) async {
+    expdata = await SQLiteHelper.sqLiteHelper.getExperiences(maintbl_id);
+    // log('exp data -  -------------------${expdata}');
+    edudata = await SQLiteHelper.sqLiteHelper.getEducations(maintbl_id);
+    // log('${edudata}');
+    languagesdata = await SQLiteHelper.sqLiteHelper.getLanguages(maintbl_id);
+    // log('${languagesdata}');
+    projectdata = await SQLiteHelper.sqLiteHelper.getProjects(maintbl_id);
+    // log('${projectdata}');
+    techskilldata = await SQLiteHelper.sqLiteHelper.getTechskills(maintbl_id);
+    // log('${techskilldata}');
+
+    fname.text = maintblData!.fname;
+    lname.text = maintblData!.lName;
+    phone.text = maintblData!.number.toString();
+    email.text = maintblData!.email;
+    address.text = maintblData!.address;
+    city.text = maintblData!.city;
+    state.text = maintblData!.state;
+    job_title.text = maintblData!.job_title;
+    aboutyourself.text = maintblData!.aboutyourself;
+
+    expdata.forEach((element) {
+      ExpModal expModal = ExpModal.fromJson(element);
+      exp.add({
+        'com_name': TextEditingController(text: expModal.companyName),
+        'com_job_post': TextEditingController(text: expModal.jobRole),
+        'join_date': TextEditingController(text: expModal.joinTime),
+        'left_date': TextEditingController(text: expModal.leftTime),
+      });
+    });
+    edudata.forEach((element) {
+      EducationModel educationModel = EducationModel.fromJson(element);
+      education.add({
+        'location_name':
+            TextEditingController(text: educationModel.locationName),
+        'joindate': TextEditingController(text: educationModel.eduJoinDate),
+        'leftdate': TextEditingController(text: educationModel.eduLeftDate),
+        'edu_type': TextEditingController(text: educationModel.eduType),
+        'edu_score': TextEditingController(text: educationModel.eduScore),
+      });
+    });
+    languagesdata.forEach((element) {
+      langeuages.add(TextEditingController(text: element['lang_name']));
+    });
+    projectdata.forEach((element) {
+      ProjectModel projectModel = ProjectModel.fromJson(element);
+      projects.add({
+        'pro_name': TextEditingController(text: projectModel.proName),
+        'pro_detail': TextEditingController(text: projectModel.proDetail),
+      });
+    });
+    techskilldata.forEach((element) {
+      techskills.add(TextEditingController(text: element['ts_name']));
+    });
+    setState(() {});
   }
 
   @override
@@ -90,64 +160,140 @@ class _AddResumePageState extends State<AddResumePage> {
       ),
       bottomSheet: GestureDetector(
         onTap: () async {
-
           int? maintbl_id;
-          await SQLiteHelper.sqLiteHelper.addmaintbl(
-              fname.text,
-              lname.text,
-              int.parse(phone.text),
-              email.text,
-              address.text,
-              city.text,
-              state.text,
-              aboutyourself.text,
-              job_title.text,
-              '');
+          await SQLiteHelper.sqLiteHelper.updatemaintbl(
+            maintblData!.resume_id,
+            fname.text,
+            lname.text,
+            int.parse(phone.text),
+            email.text,
+            address.text,
+            city.text,
+            state.text,
+            aboutyourself.text,
+            job_title.text,
+          );
 
-          List<Map<String, Object?>> data = await SQLiteHelper.sqLiteHelper.getmaintbl();
+          List<Map<String, Object?>> data =
+              await SQLiteHelper.sqLiteHelper.getmaintbl();
           maintbl_id = int.parse(data[data.length - 1]['resume_id'].toString());
-          for (int i = 0; i < education.length; i++) {
-            SQLiteHelper.sqLiteHelper.addEducation(
-              maintbl_id,
-              education[i]['location_name'].text,
-              education[i]['joindate'].text,
-              education[i]['leftdate'].text,
-              education[i]['edu_type'].text,
-              education[i]['edu_score'].text,
-            );
+
+          if (edudata.length == 0) {
+            for (int i = 0; i < education.length; i++) {
+              SQLiteHelper.sqLiteHelper.addEducation(
+                maintbl_id,
+                education[i]['location_name'].text,
+                education[i]['joindate'].text,
+                education[i]['leftdate'].text,
+                education[i]['edu_type'].text,
+                education[i]['edu_score'].text,
+              );
+            }
+          } else {
+            for (int i = 0; i < edudata.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .deleteEducation(int.parse(edudata[i]['edu_id']));
+            }
+
+            for (int i = 0; i < education.length; i++) {
+              SQLiteHelper.sqLiteHelper.addEducation(
+                maintbl_id,
+                education[i]['location_name'].text,
+                education[i]['joindate'].text,
+                education[i]['leftdate'].text,
+                education[i]['edu_type'].text,
+                education[i]['edu_score'].text,
+              );
+            }
           }
 
-          for (int i = 0; i < projects.length; i++) {
-            SQLiteHelper.sqLiteHelper.addProject(
-              maintbl_id,
-              projects[i]['pro_name'].text,
-              projects[i]['pro_detail'].text,
+          if (projectdata.length == 0) {
+            for (int i = 0; i < projects.length; i++) {
+              SQLiteHelper.sqLiteHelper.addProject(
+                maintbl_id,
+                projects[i]['pro_name'].text,
+                projects[i]['pro_detail'].text,
+              );
+            }
+          } else {
+            for (int i = 0; i < projectdata.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .deleteProject(int.parse(projectdata[i]['pro_id']));
+            }
 
-            );
-          }
-
-          for (int i = 0; i < exp.length; i++) {
-            SQLiteHelper.sqLiteHelper.addExperience(
-              maintbl_id,
-              exp[i]['com_name'].text,
-              exp[i]['join_date'].text,
-              exp[i]['left_date'].text,
-              exp[i]['com_job_post'].text,
-            );
-          }
-          for (int i = 0; i < techskills.length; i++) {
-            SQLiteHelper.sqLiteHelper.addTechskills(
-              maintbl_id,
-              techskills[i].text,
-            );
-          }
-          for (int i = 0; i < langeuages.length; i++) {
-            SQLiteHelper.sqLiteHelper.addLanguage(
-              maintbl_id,
-              langeuages[i].text,
-            );
+            for (int i = 0; i < projects.length; i++) {
+              SQLiteHelper.sqLiteHelper.addProject(
+                maintbl_id,
+                projects[i]['pro_name'].text,
+                projects[i]['pro_detail'].text,
+              );
+            }
           }
 
+          if (expdata.length == 0) {
+            for (int i = 0; i < exp.length; i++) {
+              SQLiteHelper.sqLiteHelper.addExperience(
+                maintbl_id,
+                exp[i]['com_name'].text,
+                exp[i]['join_date'].text,
+                exp[i]['left_date'].text,
+                exp[i]['com_job_post'].text,
+              );
+            }
+          } else {
+            for (int i = 0; i < expdata.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .deleteExperience(int.parse(expdata[i]['exp_id']));
+            }
+
+            for (int i = 0; i < exp.length; i++) {
+              SQLiteHelper.sqLiteHelper.addExperience(
+                maintbl_id,
+                exp[i]['com_name'].text,
+                exp[i]['join_date'].text,
+                exp[i]['left_date'].text,
+                exp[i]['com_job_post'].text,
+              );
+            }
+          }
+
+          if (techskilldata.length == 0) {
+            for (int i = 0; i < techskills.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .addTechskills(maintbl_id, techskills[i].text);
+            }
+          } else {
+            for (int i = 0; i < techskilldata.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .deleteTechskills(int.parse(techskilldata[i]['ts_id']));
+            }
+
+            for (int i = 0; i < techskills.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .addTechskills(maintbl_id, techskills[i].text);
+            }
+          }
+
+          if (languagesdata.length == 0) {
+            for (int i = 0; i < langeuages.length; i++) {
+              SQLiteHelper.sqLiteHelper.addLanguage(
+                maintbl_id,
+                langeuages[i].text,
+              );
+            }
+          } else {
+            for (int i = 0; i < languagesdata.length; i++) {
+              SQLiteHelper.sqLiteHelper
+                  .deleteLanguage(int.parse(languagesdata[i]['lang_id']));
+            }
+
+            for (int i = 0; i < langeuages.length; i++) {
+              SQLiteHelper.sqLiteHelper.addLanguage(
+                maintbl_id,
+                langeuages[i].text,
+              );
+            }
+          }
           fname.clear();
           lname.clear();
           phone.clear();
@@ -165,7 +311,6 @@ class _AddResumePageState extends State<AddResumePage> {
           langeuages.clear();
 
           Navigator.pop(context);
-
         },
         child: Container(
           height: s.height * 0.1,
@@ -910,4 +1055,10 @@ class _AddResumePageState extends State<AddResumePage> {
       ),
     );
   }
+}
+
+@override
+Widget build(BuildContext context) {
+  // TODO: implement build
+  throw UnimplementedError();
 }

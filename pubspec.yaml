@@ -39,6 +39,9 @@ dependencies:
   provider: any
   path_provider: any
   animated_splash_screen:
+  pdf:
+  printing:
+  intl:
 
 
 

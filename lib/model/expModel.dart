@@ -1,40 +1,32 @@
 class ExpModal {
-
-
-  int exp_id;
-  String compny_name;
-  DateTime join_time;
-  DateTime left_time;
-  String job_role;
-  DateTime create_time;
+  final int expId;
+  final int maintblId;
+  final String companyName;
+  final String joinTime;
+  final String leftTime;
+  final String jobRole;
+  final String createTime;
 
   ExpModal({
-    required this.exp_id,
-    required this.compny_name,
-    required this.join_time,
-    required this.left_time,
-    required this.job_role,
-    required this.create_time,
+    required this.expId,
+    required this.maintblId,
+    required this.companyName,
+    required this.joinTime,
+    required this.leftTime,
+    required this.jobRole,
+    required this.createTime,
   });
 
   factory ExpModal.fromJson(Map<String, dynamic> json) {
     return ExpModal(
-        exp_id: json['exp_id'],
-        compny_name: json['compny_name'],
-        join_time: json['join_time'],
-        left_time: json['left_time'],
-        job_role: json['job_role'],
-        create_time: json['create_time']);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'exp_id': exp_id,
-      'compny_name': compny_name,
-      'join_time': join_time,
-      'left_time': left_time,
-      'job_role': job_role,
-      'create_time': create_time,
-    };
+      expId: json['exp_id'],
+      maintblId: json['maintbl_id'],
+      companyName: json['compny_name'],
+      joinTime: json['join_time'],
+      leftTime: json['left_time'],
+      jobRole: json['job_role'],
+      createTime: json['create_time'],
+    );
   }
 }
+

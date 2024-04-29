@@ -1,30 +1,23 @@
 class IangeuageModel {
-
-
-
-
-  int lang_id;
-  String lang_name;
-  DateTime create_time;
+  final int langId;
+  final int maintblId;
+  final String langName;
+  final String createTime;
 
   IangeuageModel({
-    required this.lang_id,
-    required this.lang_name,
-    required this.create_time,
+    required this.langId,
+    required this.maintblId,
+    required this.langName,
+    required this.createTime,
   });
 
   factory IangeuageModel.fromJson(Map<String, dynamic> json) {
     return IangeuageModel(
-        lang_id: json['lang_id'],
-        lang_name: json['lang_name'],
-        create_time: json['create_time']);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'lang_id': lang_id,
-      'lang_name': lang_name,
-      'create_time': create_time,
-    };
+      langId: json['lang_id'],
+      maintblId: json['maintbl_id'],
+      langName: json['lang_name'],
+      createTime: json['create_time'],
+    );
   }
 }
+

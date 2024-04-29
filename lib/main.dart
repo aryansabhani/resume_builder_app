@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resume_builder_app/controller/resumeController.dart';
 import 'package:resume_builder_app/view/screens/addResumePage.dart';
+import 'package:resume_builder_app/view/screens/createResume.dart';
+import 'package:resume_builder_app/view/screens/editResumepage.dart';
 import 'package:resume_builder_app/view/screens/showResumeScreen.dart';
 import 'package:resume_builder_app/view/screens/splashScreen.dart';
 
@@ -28,6 +30,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => AnimatedSplas(),
         'main_page': (context) => ShowAllResumeScreen(),
         'add_page': (context) => AddResumePage(),
+        'editResume': (context) => EditResumePage(),
+        'showResume': (context) => CreateResume(),
       },
     );
   }

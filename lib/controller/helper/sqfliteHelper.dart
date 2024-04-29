@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class SQLiteHelper {
-  final _databaseName = "mydatabase2.db";
+  final _databaseName = "zenresume2.db";
   final _databaseVersion = 1;
 
   final table = 'resume';
@@ -46,11 +46,12 @@ class SQLiteHelper {
   final techskills = 'techskills';
   final ts_id = 'ts_id';
   final ts_name = 'ts_name';
-  final sub_ts_name = 'sub_ts_name';
 
   final language = 'language';
   final lang_id = 'lang_id';
   final lang_name = 'lang_name';
+
+  final maintbl_id = 'maintbl_id';
 
   SQLiteHelper._();
 
@@ -73,6 +74,7 @@ class SQLiteHelper {
           await db.execute('''
           CREATE TABLE $table (
             $resume_id INTEGER PRIMARY KEY,
+            $maintbl_id INTEGER,
             $resume_name TEXT,
             $fName TEXT,
             $lName TEXT,
@@ -90,6 +92,7 @@ class SQLiteHelper {
           await db.execute('''
           CREATE TABLE $project_table (
             $pro_id INTEGER PRIMARY KEY,
+            $maintbl_id INTEGER,
             $pro_name TEXT,
             $pro_detail TEXT,
             $create_time TEXT NOT NULL
@@ -98,6 +101,7 @@ class SQLiteHelper {
           await db.execute('''
           CREATE TABLE $experience (
             $exp_id INTEGER PRIMARY KEY,
+            $maintbl_id INTEGER,
             $compny_name TEXT,
             $join_time TEXT,
             $left_time TEXT,
@@ -108,6 +112,7 @@ class SQLiteHelper {
           await db.execute('''
           CREATE TABLE $education (
             $edu_id INTEGER PRIMARY KEY,
+            $maintbl_id INTEGER,
             $location_name TEXT,
             $edu_join_date TEXT,
             $edu_left_date TEXT,
@@ -119,14 +124,15 @@ class SQLiteHelper {
           await db.execute('''
           CREATE TABLE $techskills (
             $ts_id INTEGER PRIMARY KEY,
+            $maintbl_id INTEGER,
             $ts_name TEXT,
-            $sub_ts_name TEXT,
             $create_time TEXT NOT NULL
           )
           ''');
           await db.execute('''
           CREATE TABLE $language (
             $lang_id INTEGER PRIMARY KEY,
+            $maintbl_id INTEGER,
             $lang_name TEXT,
             $create_time TEXT NOT NULL
           )
@@ -134,19 +140,18 @@ class SQLiteHelper {
         });
   }
 
-
   addmaintbl(
-    String fname,
-    String lname,
-    int mobile_number,
-    String emailid,
-    String addresss,
-    String cityname,
-    String statename,
-    String aboutyourSelf,
-    String jobTitle,
-    String uphoto,
-  ) async {
+      String fname,
+      String lname,
+      int mobile_number,
+      String emailid,
+      String addresss,
+      String cityname,
+      String statename,
+      String aboutyourSelf,
+      String jobTitle,
+      String uphoto,
+      ) async {
     final db = await database;
     int index = await db.insert(
       '$table',
@@ -154,7 +159,7 @@ class SQLiteHelper {
         fName: fname,
         lName: lname,
         resume_name: fname + lname,
-        photo: uphoto, // Corrected column name
+        photo: uphoto,
         number: mobile_number,
         email: emailid,
         address: addresss,
@@ -167,7 +172,6 @@ class SQLiteHelper {
     );
     log('${index}');
   }
-
 
 
 
@@ -221,33 +225,36 @@ class SQLiteHelper {
 
   // project tbl
 
+  // Project table CRUD operations
   addProject(
-    String name,
-    String detail,
-  ) async {
+      int maintblId,
+      String name,
+      String detail,
+      ) async {
     final db = await database;
     await db.insert(
       '$project_table',
       {
+        maintbl_id: maintblId,
         pro_name: name,
-        pro_detail: detail, // Corrected column name
+        pro_detail: detail,
         create_time: DateTime.now().toString(),
       },
     );
   }
 
   updateProject(
-    int id,
-    String name,
-    String detail,
-  ) async {
+      int id,
+      String name,
+      String detail,
+      ) async {
     final db = await database;
 
     await db.update(
       '$project_table',
       {
         pro_name: name,
-        pro_detail: detail, // Corrected column nam
+        pro_detail: detail,
       },
       where: '$pro_id = ?',
       whereArgs: [id],
@@ -263,40 +270,44 @@ class SQLiteHelper {
     );
   }
 
-  getProject() async {
+  Future<List<Map<String, dynamic>>> getProjects(int maintblId) async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $project_table');
-    return list;
+    return db.query(
+      '$project_table',
+      where: '$maintbl_id = ?',
+      whereArgs: [maintblId],
+    );
   }
 
-  // experience
-
-  addexperience(
-    String c_name,
-    DateTime join_date,
-    DateTime left_date,
-    String jobRole,
-  ) async {
+// Experience table CRUD operations
+  addExperience(
+      int maintblId,
+      String c_name,
+      String join_date,
+      String left_date,
+      String jobRole,
+      ) async {
     final db = await database;
     await db.insert(
       '$experience',
       {
+        maintbl_id: maintblId,
         compny_name: c_name,
         join_time: join_date,
         left_time: left_date,
-        job_role: jobRole, // Corrected column name
+        job_role: jobRole,
         create_time: DateTime.now().toString(),
       },
     );
   }
 
-  updateexperience(
-    int id,
-    String c_name,
-    DateTime join_date,
-    DateTime left_date,
-    String jobRole,
-  ) async {
+  updateExperience(
+      int id,
+      String c_name,
+      String join_date,
+      String left_date,
+      String jobRole,
+      ) async {
     final db = await database;
 
     await db.update(
@@ -305,14 +316,14 @@ class SQLiteHelper {
         compny_name: c_name,
         join_time: join_date,
         left_time: left_date,
-        job_role: jobRole, // // Corrected column nam
+        job_role: jobRole,
       },
       where: '$exp_id = ?',
       whereArgs: [id],
     );
   }
 
-  deleteexperience(int id) async {
+  deleteExperience(int id) async {
     final db = await database;
     await db.delete(
       '$experience',
@@ -321,43 +332,47 @@ class SQLiteHelper {
     );
   }
 
-  getexperience() async {
+  Future<List<Map<String, dynamic>>> getExperiences(int maintblId) async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $experience');
-    return list;
+    return db.query(
+      '$experience',
+      where: '$maintbl_id = ?',
+      whereArgs: [maintblId],
+    );
   }
 
-  //education
-
-  addeducation(
-    String locationName,
-    DateTime edu_joinDate,
-    DateTime edu_leftDate,
-    String eduType,
-    String eduscore,
-  ) async {
+// Education table CRUD operations
+  addEducation(
+      int maintblId,
+      String locationName,
+      String edu_joinDate,
+      String edu_leftDate,
+      String eduType,
+      String eduscore,
+      ) async {
     final db = await database;
     await db.insert(
       '$education',
       {
+        maintbl_id: maintblId,
         location_name: locationName,
         edu_join_date: edu_joinDate,
         edu_left_date: edu_leftDate,
-        edu_type: eduType, // Corrected column name
-        edu_score: eduscore, // Corrected column name
+        edu_type: eduType,
+        edu_score: eduscore,
         create_time: DateTime.now().toString(),
       },
     );
   }
 
   updateEducation(
-    int id,
-    String locationName,
-    DateTime edu_joinDate,
-    DateTime edu_leftDate,
-    String eduType,
-    String eduscore,
-  ) async {
+      int id,
+      String locationName,
+      String edu_joinDate,
+      String edu_leftDate,
+      String eduType,
+      String eduscore,
+      ) async {
     final db = await database;
 
     await db.update(
@@ -366,15 +381,15 @@ class SQLiteHelper {
         location_name: locationName,
         edu_join_date: edu_joinDate,
         edu_left_date: edu_leftDate,
-        edu_type: eduType, // Corrected column name
-        edu_score: eduscore, // C// Corrected column nam
+        edu_type: eduType,
+        edu_score: eduscore,
       },
       where: '$edu_id = ?',
       whereArgs: [id],
     );
   }
 
-  deleteeducation(int id) async {
+  deleteEducation(int id) async {
     final db = await database;
     await db.delete(
       '$education',
@@ -383,11 +398,15 @@ class SQLiteHelper {
     );
   }
 
-  geteducation() async {
+  Future<List<Map<String, dynamic>>> getEducations(int maintblId) async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $education');
-    return list;
+    return db.query(
+      '$education',
+      where: '$maintbl_id = ?',
+      whereArgs: [maintblId],
+    );
   }
+
 
   //techskills
 
@@ -399,34 +418,31 @@ class SQLiteHelper {
   // static final sub_ts_name = 'sub_ts_name';
   //
   //
-
   addTechskills(
-    String tsName,
-    String subts_name,
-  ) async {
+      int maintblId,
+      String tsName,
+      ) async {
     final db = await database;
     await db.insert(
       '$techskills',
       {
+        maintbl_id: maintblId,
         ts_name: tsName,
-        sub_ts_name: subts_name,
         create_time: DateTime.now().toString(),
       },
     );
   }
 
   updateTechskills(
-    int id,
-    String tsName,
-    String subts_name,
-  ) async {
+      int id,
+      String tsName,
+      ) async {
     final db = await database;
 
     await db.update(
       '$techskills',
       {
         ts_name: tsName,
-        sub_ts_name: subts_name,
       },
       where: '$ts_id = ?',
       whereArgs: [id],
@@ -442,38 +458,35 @@ class SQLiteHelper {
     );
   }
 
-  getTechskills() async {
+  Future<List<Map<String, dynamic>>> getTechskills(int maintblId) async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $techskills');
-    return list;
+    return db.query(
+      '$techskills',
+      where: '$maintbl_id = ?',
+      whereArgs: [maintblId],
+    );
   }
 
-  //tbl langeuage
-  //
-  // static final langeuage = 'langeuage';
-  // static final lang_id = 'lang_id';
-  // s  tatic final lang_name = 'lang_name';
-
-  addlangeuage(
-    String lang,
-  ) async {
+// Language table CRUD operations
+  addLanguage(
+      int maintblId,
+      String lang,
+      ) async {
     final db = await database;
-    int index =await db.insert(
+    await db.insert(
       '$language',
       {
+        maintbl_id: maintblId,
         lang_name: lang,
         create_time: DateTime.now().toString(),
       },
     );
-
-    log('${index}');
   }
 
-  updatelangeuage(
-    int id,
-    String lang,
-    String subts_name,
-  ) async {
+  updateLanguage(
+      int id,
+      String lang,
+      ) async {
     final db = await database;
 
     await db.update(
@@ -481,23 +494,26 @@ class SQLiteHelper {
       {
         lang_name: lang,
       },
-      where: '$ts_id = ?',
+      where: '$lang_id = ?',
       whereArgs: [id],
     );
   }
 
-  deletelangeuage(int id) async {
+  deleteLanguage(int id) async {
     final db = await database;
     await db.delete(
       '$language',
-      where: '$ts_id = ?',
+      where: '$lang_id = ?',
       whereArgs: [id],
     );
   }
 
-  getlangeuage() async {
+  Future<List<Map<String, dynamic>>> getLanguages(int maintblId) async {
     final db = await database;
-    List<Map> list = await db.rawQuery('SELECT * FROM $language');
-    return list;
+    return db.query(
+      '$language',
+      where: '$maintbl_id = ?',
+      whereArgs: [maintblId],
+    );
   }
 }

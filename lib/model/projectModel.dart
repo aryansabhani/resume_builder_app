@@ -1,30 +1,26 @@
 class ProjectModel {
-  int pro_id;
-  String pro_name;
-  String pro_detail;
-  DateTime create_time;
+  final int proId;
+  final int maintblId;
+  final String proName;
+  final String proDetail;
+  final String createTime;
 
   ProjectModel({
-    required this.pro_id,
-    required this.pro_name,
-    required this.pro_detail,
-    required this.create_time,
+    required this.proId,
+    required this.maintblId,
+    required this.proName,
+    required this.proDetail,
+    required this.createTime,
   });
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
-        pro_id: json['pro_id'],
-        pro_name: json['pro_name'],
-        pro_detail: json['pro_detail'],
-        create_time: json['create_time']);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'pro_id': pro_id,
-      'pro_name': pro_name,
-      'pro_detail': pro_detail,
-      'create_time': create_time,
-    };
+      proId: json['pro_id'],
+      maintblId: json['maintbl_id'],
+      proName: json['pro_name'],
+      proDetail: json['pro_detail'],
+      createTime: json['create_time'],
+    );
   }
 }
+
