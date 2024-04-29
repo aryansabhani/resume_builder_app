@@ -10,6 +10,7 @@ class SQLiteHelper {
 
   static final table = 'resume';
   static final resume_id = 'resume_id';
+  static final photo = 'photo';
   static final fName = 'fname';
   static final lName = 'lName';
   static final aboutyourself = 'aboutyourself';
@@ -85,6 +86,7 @@ class SQLiteHelper {
             $address TEXT,
             $city TEXT,
             $state TEXT,
+            $photo TEXT,
             $aboutyourself TEXT,
             $job_title TEXT,
             $create_time DATE NOT NULL,
@@ -147,13 +149,15 @@ class SQLiteHelper {
     String statename,
     String aboutyourSelf,
     String jobTitle,
+    String uphoto,
   ) async {
     final db = await database;
     await db.insert(
       '$table',
       {
         fName: fname,
-        lName: lname, // Corrected column name
+        fName: fname,
+        photo: uphoto, // Corrected column name
         number: mobile_number,
         email: email,
         address: address,
