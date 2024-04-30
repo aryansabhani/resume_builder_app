@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:resume_builder_app/controller/helper/sqfliteHelper.dart';
 import 'package:resume_builder_app/model/maintblModel.dart';
 
@@ -27,7 +31,6 @@ class _EditResumePageState extends State<EditResumePage> {
     'Projects',
     'Experience',
   ];
-
 
   bool datafetch = false;
 
@@ -85,8 +88,8 @@ class _EditResumePageState extends State<EditResumePage> {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     maintblData = ModalRoute.of(context)!.settings.arguments as MainTblModel;
-    if(datafetch == false){
-    getotherdata(maintbl_id: maintblData!.resume_id);
+    if (datafetch == false) {
+      getotherdata(maintbl_id: maintblData!.resume_id);
     }
   }
 
@@ -97,6 +100,12 @@ class _EditResumePageState extends State<EditResumePage> {
   List<Map<String, dynamic>> techskilldata = [];
 
   getotherdata({required int maintbl_id}) async {
+    _imageBytes = null;
+    if (maintblData?.photo == null && maintblData?.photo == '') {
+    } else {
+      _imageBytes = base64Decode(maintblData!.photo);
+    }
+
     expdata = await SQLiteHelper.sqLiteHelper.getExperiences(maintbl_id);
     // log('exp data -  -------------------${expdata}');
     edudata = await SQLiteHelper.sqLiteHelper.getEducations(maintbl_id);
@@ -155,6 +164,64 @@ class _EditResumePageState extends State<EditResumePage> {
     setState(() {});
   }
 
+  File? _imageFile;
+  Uint8List? _imageBytes;
+
+  void _showImagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Choose from Gallery'),
+                onTap: () {
+                  _getImage(ImageSource.gallery);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Take a Picture'),
+                onTap: () {
+                  _getImage(ImageSource.camera);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _getImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+
+    if (pickedFile != null) {
+      _imageFile = File(pickedFile.path);
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+      });
+    } else {
+      print('No image selected.');
+    }
+  }
+
+  String? _convertImageToString() {
+    if (_imageBytes != null) {
+      // Encode image bytes to base64 string
+
+      String base64Image = base64Encode(_imageBytes!);
+      return base64Image;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = MediaQuery.of(context).size;
@@ -167,6 +234,8 @@ class _EditResumePageState extends State<EditResumePage> {
       bottomSheet: GestureDetector(
         onTap: () async {
           int? maintbl_id;
+          String? image = _convertImageToString();
+
           await SQLiteHelper.sqLiteHelper.updatemaintbl(
             maintblData!.resume_id,
             fname.text,
@@ -178,6 +247,7 @@ class _EditResumePageState extends State<EditResumePage> {
             state.text,
             aboutyourself.text,
             job_title.text,
+            image.toString(),
           );
 
           List<Map<String, Object?>> data =
@@ -198,7 +268,7 @@ class _EditResumePageState extends State<EditResumePage> {
           } else {
             for (int i = 0; i < edudata.length; i++) {
               SQLiteHelper.sqLiteHelper
-                  .deleteEducation(int.parse(edudata[i]['edu_id']));
+                  .deleteEducation(int.parse(edudata[i]['edu_id'].toString()));
             }
 
             for (int i = 0; i < education.length; i++) {
@@ -224,7 +294,7 @@ class _EditResumePageState extends State<EditResumePage> {
           } else {
             for (int i = 0; i < projectdata.length; i++) {
               SQLiteHelper.sqLiteHelper
-                  .deleteProject(int.parse(projectdata[i]['pro_id']));
+                  .deleteProject(int.parse(projectdata[i]['pro_id'].toString()));
             }
 
             for (int i = 0; i < projects.length; i++) {
@@ -249,7 +319,7 @@ class _EditResumePageState extends State<EditResumePage> {
           } else {
             for (int i = 0; i < expdata.length; i++) {
               SQLiteHelper.sqLiteHelper
-                  .deleteExperience(int.parse(expdata[i]['exp_id']));
+                  .deleteExperience(int.parse(expdata[i]['exp_id'].toString()));
             }
 
             for (int i = 0; i < exp.length; i++) {
@@ -271,7 +341,7 @@ class _EditResumePageState extends State<EditResumePage> {
           } else {
             for (int i = 0; i < techskilldata.length; i++) {
               SQLiteHelper.sqLiteHelper
-                  .deleteTechskills(int.parse(techskilldata[i]['ts_id']));
+                  .deleteTechskills(int.parse(techskilldata[i]['ts_id'].toString()));
             }
 
             for (int i = 0; i < techskills.length; i++) {
@@ -290,7 +360,7 @@ class _EditResumePageState extends State<EditResumePage> {
           } else {
             for (int i = 0; i < languagesdata.length; i++) {
               SQLiteHelper.sqLiteHelper
-                  .deleteLanguage(int.parse(languagesdata[i]['lang_id']));
+                  .deleteLanguage(int.parse(languagesdata[i]['lang_id'].toString()));
             }
 
             for (int i = 0; i < langeuages.length; i++) {
@@ -381,6 +451,27 @@ class _EditResumePageState extends State<EditResumePage> {
                 visible: selecatfild == 'Main' ? true : false,
                 child: Column(
                   children: [
+                    InkWell(
+                      onTap: () {
+                        _showImagePicker(context);
+                      },
+                      borderRadius: BorderRadius.circular(s.height * 0.06),
+                      child: CircleAvatar(
+                        radius: s.width * 0.15,
+                        foregroundImage:  _imageBytes != null ? MemoryImage(_imageBytes!) : null,
+                        // backgroundColorn: Colors.blacks,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: CircleAvatar(
+                            radius: 14,
+                            child: Icon(Icons.add),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: s.height * 0.03,
+                    ),
                     Row(
                       children: [
                         Expanded(

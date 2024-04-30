@@ -180,22 +180,24 @@ class SQLiteHelper {
     String fname,
     String lname,
     int mobile_number,
-    String email,
-    String address,
+    String email_add,
+    String addresss,
     String cityname,
     String statename,
     String aboutyourSelf,
     String jobTitle,
+    String photo_path,
   ) async {
     final db = await database;
     await db.update(
       '$table',
       {
         fName: fname,
+        photo: photo_path,
         lName: lname, // Corrected column name
         number: mobile_number,
-        email: email,
-        address: address,
+        email: email_add,
+        address: addresss,
         city: cityname,
         state: statename,
         aboutyourself: aboutyourSelf,

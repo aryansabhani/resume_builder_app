@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:resume_builder_app/controller/helper/sqfliteHelper.dart';
 import 'package:resume_builder_app/controller/resumeController.dart';
@@ -62,6 +66,69 @@ class _AddResumePageState extends State<AddResumePage> {
     'left_date': TextEditingController(),
   };
 
+  File? _imageFile;
+  Uint8List? _imageBytes;
+
+
+  void _showImagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Choose from Gallery'),
+                onTap: () {
+                  _getImage(ImageSource.gallery);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Take a Picture'),
+                onTap: () {
+                  _getImage(ImageSource.camera);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _getImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+
+
+      if (pickedFile != null) {
+        _imageFile = File(pickedFile.path);
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _imageBytes = bytes;
+        });
+      } else {
+        print('No image selected.');
+      }
+
+  }
+
+  String? _convertImageToString() {
+    if (_imageBytes != null) {
+
+      // Encode image bytes to base64 string
+
+      String base64Image = base64Encode(_imageBytes!);
+      return base64Image;
+    }
+    return null;
+  }
+
+
   List education = [];
   List exp = [];
   List projects = [];
@@ -79,9 +146,12 @@ class _AddResumePageState extends State<AddResumePage> {
     langeuages.add(TextEditingController());
   }
 
+
   @override
   Widget build(BuildContext context) {
-    final s = MediaQuery.of(context).size;
+    final s = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Your Detail'),
@@ -90,8 +160,8 @@ class _AddResumePageState extends State<AddResumePage> {
       ),
       bottomSheet: GestureDetector(
         onTap: () async {
-
           int? maintbl_id;
+          String? image = _convertImageToString();
           await SQLiteHelper.sqLiteHelper.addmaintbl(
               fname.text,
               lname.text,
@@ -102,9 +172,10 @@ class _AddResumePageState extends State<AddResumePage> {
               state.text,
               aboutyourself.text,
               job_title.text,
-              '');
+              image.toString());
 
-          List<Map<String, Object?>> data = await SQLiteHelper.sqLiteHelper.getmaintbl();
+          List<Map<String, Object?>> data = await SQLiteHelper.sqLiteHelper
+              .getmaintbl();
           maintbl_id = int.parse(data[data.length - 1]['resume_id'].toString());
           for (int i = 0; i < education.length; i++) {
             SQLiteHelper.sqLiteHelper.addEducation(
@@ -165,7 +236,6 @@ class _AddResumePageState extends State<AddResumePage> {
           langeuages.clear();
 
           Navigator.pop(context);
-
         },
         child: Container(
           height: s.height * 0.1,
@@ -202,7 +272,7 @@ class _AddResumePageState extends State<AddResumePage> {
                       },
                       child: Container(
                         padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         margin: EdgeInsets.symmetric(horizontal: 5),
                         decoration: BoxDecoration(
                           border: Border.all(
@@ -230,6 +300,25 @@ class _AddResumePageState extends State<AddResumePage> {
                 visible: selecatfild == 'Main' ? true : false,
                 child: Column(
                   children: [
+                    InkWell(
+
+                      onTap: () {
+                        _showImagePicker(context);
+                      },
+                      borderRadius: BorderRadius.circular(s.height * 0.06),
+                      child: CircleAvatar(
+                        radius: s.width * 0.15,
+                        foregroundImage: _imageFile == null ? null  : FileImage(_imageFile!,),
+                        // backgroundColorn: Colors.blacks,
+                        child:Align(
+                          alignment: Alignment.bottomRight, child: CircleAvatar(
+                          radius: 14,
+                            child: Icon(
+                              Icons.add),
+                          ),) ,
+                      ),
+                    ),
+                    SizedBox(height: s.height * 0.03,),
                     Row(
                       children: [
                         Expanded(
@@ -242,11 +331,11 @@ class _AddResumePageState extends State<AddResumePage> {
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Color(0XFFBDE5E1))),
+                                    BorderSide(color: Color(0XFFBDE5E1))),
                                 errorBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Colors.redAccent))),
+                                    BorderSide(color: Colors.redAccent))),
                           ),
                         ),
                         SizedBox(
@@ -262,11 +351,11 @@ class _AddResumePageState extends State<AddResumePage> {
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Color(0XFFBDE5E1))),
+                                    BorderSide(color: Color(0XFFBDE5E1))),
                                 errorBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Colors.redAccent))),
+                                    BorderSide(color: Colors.redAccent))),
                           ),
                         ),
                       ],
@@ -335,11 +424,11 @@ class _AddResumePageState extends State<AddResumePage> {
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Color(0XFFBDE5E1))),
+                                    BorderSide(color: Color(0XFFBDE5E1))),
                                 errorBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Colors.redAccent))),
+                                    BorderSide(color: Colors.redAccent))),
                           ),
                         ),
                         SizedBox(
@@ -355,11 +444,11 @@ class _AddResumePageState extends State<AddResumePage> {
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Color(0XFFBDE5E1))),
+                                    BorderSide(color: Color(0XFFBDE5E1))),
                                 errorBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(15),
                                     borderSide:
-                                        BorderSide(color: Colors.redAccent))),
+                                    BorderSide(color: Colors.redAccent))),
                           ),
                         ),
                       ],
@@ -452,11 +541,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -475,7 +564,7 @@ class _AddResumePageState extends State<AddResumePage> {
                                     labelText: 'Join Date',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(15)),
+                                        BorderRadius.circular(15)),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
                                         borderSide: BorderSide(
@@ -496,7 +585,7 @@ class _AddResumePageState extends State<AddResumePage> {
                                     labelText: 'Leave Date',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(15)),
+                                        BorderRadius.circular(15)),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
                                         borderSide: BorderSide(
@@ -521,11 +610,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -539,11 +628,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -605,11 +694,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -671,11 +760,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -737,11 +826,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -755,11 +844,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -821,11 +910,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -839,11 +928,11 @@ class _AddResumePageState extends State<AddResumePage> {
                               focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Color(0XFFBDE5E1))),
+                                  BorderSide(color: Color(0XFFBDE5E1))),
                               errorBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(15),
                                   borderSide:
-                                      BorderSide(color: Colors.redAccent))),
+                                  BorderSide(color: Colors.redAccent))),
                         ),
                         SizedBox(
                           height: s.height * 0.02,
@@ -862,7 +951,7 @@ class _AddResumePageState extends State<AddResumePage> {
                                     labelText: 'Join Date',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(15)),
+                                        BorderRadius.circular(15)),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
                                         borderSide: BorderSide(
@@ -883,7 +972,7 @@ class _AddResumePageState extends State<AddResumePage> {
                                     labelText: 'Leave Date',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(15)),
+                                        BorderRadius.circular(15)),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(15),
                                         borderSide: BorderSide(

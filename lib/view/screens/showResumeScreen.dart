@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:resume_builder_app/controller/helper/sqfliteHelper.dart';
@@ -31,23 +33,33 @@ class _ShowAllResumeScreenState extends State<ShowAllResumeScreen> {
               resumes.add(MainTblModel.fromJson(element));
               log(resumes.length.toString());
             });
-            return ListView.builder(
-
+            return resumes.length == 0 ? Center(child: Text('No Resumes Found')) : ListView.builder(
               padding: EdgeInsets.all(s.height * 0.015),
               physics: BouncingScrollPhysics(),
               itemCount: resumes.length,
               itemBuilder: (context, index) {
+                List<int>? imageBytes = null;
+                if (resumes[index].photo == null &&
+                    resumes[index].photo == '') {
+                } else {
+                  imageBytes = base64Decode(resumes[index].photo);
+                }
+
                 return Card(
                     child: ListTile(
-                      onTap: () {
-                        Navigator.of(context).pushNamed('showResume',arguments: resumes[index]);
-                      },
+                  onTap: () {
+                    Navigator.of(context)
+                        .pushNamed('showResume', arguments: resumes[index]);
+                  },
                   title: Text(
                     resumes[index].resume_name,
                   ),
                   leading: CircleAvatar(
                     radius: s.height * 0.025,
-                    // backgroundImage: NetworkImage(resumes[index].photo!),
+                    backgroundImage: AssetImage('asstes/image/emptyBG.png'),
+                    foregroundImage: imageBytes == null
+                      ? null
+                      : MemoryImage(Uint8List.fromList(imageBytes)),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -56,14 +68,16 @@ class _ShowAllResumeScreenState extends State<ShowAllResumeScreen> {
                       Ink(
                         height: s.height * 0.04,
                         padding: EdgeInsets.all(s.height * 0.005),
-
                         child: InkWell(
                           // splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
                           onTap: () {
-                            Navigator.of(context).pushNamed('editResume',arguments: resumes[index]);
+                            Navigator.of(context).pushNamed('editResume',
+                                arguments: resumes[index]);
                           },
                           child: Container(
-                            child: Image.asset('asstes/image/editIcon.png',),
+                            child: Image.asset(
+                              'asstes/image/editIcon.png',
+                            ),
                           ),
                         ),
                       ),
@@ -71,17 +85,16 @@ class _ShowAllResumeScreenState extends State<ShowAllResumeScreen> {
                         decoration: BoxDecoration(shape: BoxShape.circle),
                         height: s.height * 0.04,
                         padding: EdgeInsets.all(s.height * 0.005),
-
-
                         child: InkWell(
                           onTap: () {
-                            SQLiteHelper.sqLiteHelper.deletemaintbl(resumes[index].resume_id);
-                            setState(() {
-
-                            });
+                            SQLiteHelper.sqLiteHelper
+                                .deletemaintbl(resumes[index].resume_id);
+                            setState(() {});
                           },
                           child: Container(
-                            child: Image.asset('asstes/image/deleteIcon.png',),
+                            child: Image.asset(
+                              'asstes/image/deleteIcon.png',
+                            ),
                           ),
                         ),
                       ),
@@ -96,9 +109,9 @@ class _ShowAllResumeScreenState extends State<ShowAllResumeScreen> {
       ),
       bottomSheet: GestureDetector(
         onTap: () {
-          Navigator.of(context).pushNamed('add_page').then((value) => setState(() {
-
-          }));
+          Navigator.of(context)
+              .pushNamed('add_page')
+              .then((value) => setState(() {}));
         },
         child: Container(
           height: s.height * 0.1,
