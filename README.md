@@ -49,7 +49,7 @@ Upcoming birthday time calculation
 
 <div align="center">
 
-<img src="https://github.com/aryansabhani/resume_builder_app/assets/112259316/056ab1c3-dde1-4420-88a3-a9f8874d569b" width="200px" height="200px">
+<img src="https://github.com/aryansabhani/resume_builder_app/assets/112259316/056ab1c3-dde1-4420-88a3-a9f8874d569b">
 
 ### Made with ❤️ in India.
 ---
