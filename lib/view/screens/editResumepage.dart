@@ -28,6 +28,9 @@ class _EditResumePageState extends State<EditResumePage> {
     'Experience',
   ];
 
+
+  bool datafetch = false;
+
   String selecatfild = 'Main';
   TextEditingController fname = TextEditingController();
   TextEditingController lname = TextEditingController();
@@ -82,7 +85,9 @@ class _EditResumePageState extends State<EditResumePage> {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     maintblData = ModalRoute.of(context)!.settings.arguments as MainTblModel;
+    if(datafetch == false){
     getotherdata(maintbl_id: maintblData!.resume_id);
+    }
   }
 
   List<Map<String, dynamic>> expdata = [];
@@ -146,6 +151,7 @@ class _EditResumePageState extends State<EditResumePage> {
     techskilldata.forEach((element) {
       techskills.add(TextEditingController(text: element['ts_name']));
     });
+    datafetch = true;
     setState(() {});
   }
 
@@ -455,7 +461,7 @@ class _EditResumePageState extends State<EditResumePage> {
                     TextFormField(
                       controller: address,
                       decoration: InputDecoration(
-                          labelText: 'Your Address',
+                          labelText: 'Your Address (Area only)',
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15)),
                           focusedBorder: OutlineInputBorder(

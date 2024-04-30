@@ -75,7 +75,7 @@ class _ShowAllResumeScreenState extends State<ShowAllResumeScreen> {
 
                         child: InkWell(
                           onTap: () {
-                            // SQLiteHelper.sqLiteHelper.deletemaintbl(resumes[index].resume_id);
+                            SQLiteHelper.sqLiteHelper.deletemaintbl(resumes[index].resume_id);
                             setState(() {
 
                             });
